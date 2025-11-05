@@ -32,6 +32,28 @@ There are two main patterns demonstrated:
 
 > ℹ️ The server routes call the Azure OpenAI REST endpoints with `fetch` so we can take advantage of the `responses` API surface, which is not yet available in the `@azure/openai` SDK.
 
+### Azure OpenAI configuration
+
+To target Azure OpenAI deployments you need to provide the deployment identifiers and endpoint that correspond to your Azure resource. Copy `.env.sample` to `.env` and fill in the Azure variables:
+
+```bash
+AZURE_OPENAI_API_KEY=your_azure_api_key
+AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com
+AZURE_OPENAI_REALTIME_DEPLOYMENT=voice-realtime-deployment
+AZURE_OPENAI_TRANSCRIPTION_DEPLOYMENT=voice-transcription-deployment
+AZURE_OPENAI_REALTIME_API_VERSION=2024-10-01-preview
+
+# Expose the same values to the browser so the WebRTC transport can dial Azure
+NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com
+NEXT_PUBLIC_AZURE_OPENAI_REALTIME_DEPLOYMENT=voice-realtime-deployment
+NEXT_PUBLIC_AZURE_OPENAI_TRANSCRIPTION_DEPLOYMENT=voice-transcription-deployment
+NEXT_PUBLIC_AZURE_OPENAI_REALTIME_API_VERSION=2024-10-01-preview
+```
+
+`useRealtimeSession` automatically feeds these values into the Agents SDK so both the realtime model and the streaming transcription model reference the Azure deployment IDs. When an Azure endpoint is supplied the WebRTC transport switches its base URL to `https://<endpoint>/openai/realtime?api-version=<version>` (including the `api-version` query parameter) so the SDP offer/answer exchange is routed through Azure instead of api.openai.com.
+
+> **TURN / ICE configuration:** Azure OpenAI does not currently provide TURN relays. If your users connect from restrictive networks you must provide your own STUN/TURN configuration and inject it in `useRealtimeSession` via the existing `changePeerConnection` hook (for example by returning a new `RTCPeerConnection({ iceServers: [...] })`). Documenting your chosen TURN provider and credentials alongside the environment variables is highly recommended for future maintainers.
+
 # Agentic Pattern 1: Chat-Supervisor
 
 This is demonstrated in the [chatSupervisor](src/app/agentConfigs/chatSupervisor/index.ts) Agent Config. The chat agent uses the realtime model to converse with the user and handle basic tasks, like greeting the user, casual conversation, and collecting information, and a more intelligent, text-based supervisor model (e.g. `gpt-4.1`) is used extensively to handle tool calls and more challenging responses. You can control the decision boundary by "opting in" specific tasks to the chat agent as desired.
