@@ -129,10 +129,6 @@ async function callAzureResponses(config: AzureConfig, deployment: string, body:
     Authorization: `Bearer ${token}`,
   };
 
-  if (process.env.AZURE_OPENAI_API_KEY) {
-    headers['api-key'] = process.env.AZURE_OPENAI_API_KEY;
-  }
-
   const response = await fetch(url, {
     method: 'POST',
     headers,

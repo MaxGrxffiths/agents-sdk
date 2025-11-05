@@ -1,3 +1,5 @@
+import { getAzureOpenAIToken } from '@/server/azureOpenAI';
+
 const DEFAULT_REALTIME_PATH = "/openai/realtime";
 
 export interface AzureRealtimeSessionRequest {
@@ -29,7 +31,7 @@ function resolveRealtimePath(deployment: string) {
   return pathFromEnv.startsWith("/") ? pathFromEnv : `/${pathFromEnv}`;
 }
 
-export function buildAzureRealtimeSessionRequest(): AzureRealtimeSessionRequest {
+export async function buildAzureRealtimeSessionRequest(): Promise<AzureRealtimeSessionRequest> {
   const endpoint = resolveAzureEndpoint(
     process.env.AZURE_OPENAI_ENDPOINT ?? process.env.OPENAI_BASE_URL,
   );
@@ -51,16 +53,6 @@ export function buildAzureRealtimeSessionRequest(): AzureRealtimeSessionRequest 
     );
   }
 
-  const bearerToken =
-    process.env.AZURE_OPENAI_AD_TOKEN ?? process.env.AZURE_OPENAI_TOKEN;
-  const apiKey = process.env.AZURE_OPENAI_API_KEY;
-
-  if (!bearerToken && !apiKey) {
-    throw new Error(
-      "Azure credentials are missing. Provide AZURE_OPENAI_AD_TOKEN (or AZURE_OPENAI_TOKEN) or AZURE_OPENAI_API_KEY.",
-    );
-  }
-
   const realtimePath = resolveRealtimePath(deployment);
   const url = new URL(`${endpoint}${realtimePath}`);
   url.searchParams.set("api-version", apiVersion);
@@ -74,13 +66,8 @@ export function buildAzureRealtimeSessionRequest(): AzureRealtimeSessionRequest 
     "OpenAI-Beta": "realtime=v1",
   };
 
-  if (bearerToken) {
-    headers.Authorization = `Bearer ${bearerToken}`;
-  }
-
-  if (apiKey) {
-    headers["api-key"] = apiKey;
-  }
+  const accessToken = await getAzureOpenAIToken();
+  headers.Authorization = `Bearer ${accessToken}`;
 
   return {
     url: url.toString(),

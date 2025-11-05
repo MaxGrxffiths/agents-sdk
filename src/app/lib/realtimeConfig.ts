@@ -47,7 +47,6 @@ export function getBrowserRealtimeConfig(): BrowserRealtimeConfig {
 export interface ServerRealtimeConfig {
   sessionUrl: string;
   model: string;
-  headers: Record<string, string>;
   isAzure: boolean;
 }
 
@@ -72,17 +71,7 @@ export function getServerRealtimeConfig(): ServerRealtimeConfig {
     process.env.REALTIME_MODEL ??
     DEFAULT_REALTIME_MODEL;
 
-  const headers: Record<string, string> = isAzure
-    ? {
-        'api-key': process.env.AZURE_OPENAI_API_KEY ?? '',
-        'Content-Type': 'application/json',
-      }
-    : {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY ?? ''}`,
-        'Content-Type': 'application/json',
-      };
-
-  return { sessionUrl, model, headers, isAzure };
+  return { sessionUrl, model, isAzure };
 }
 
 export const DEFAULTS = {
