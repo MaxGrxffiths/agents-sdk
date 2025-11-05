@@ -1,21 +1,32 @@
 import { NextResponse } from "next/server";
 
+import { getServerRealtimeConfig } from "../../lib/realtimeConfig";
+
 export async function GET() {
   try {
-    const response = await fetch(
-      "https://api.openai.com/v1/realtime/sessions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-realtime-preview-2025-06-03",
-        }),
-      }
-    );
+    const { sessionUrl, model, headers } = getServerRealtimeConfig();
+
+    if (!headers["api-key"] && !headers["Authorization"]) {
+      throw new Error(
+        "Missing API credentials for realtime session creation",
+      );
+    }
+
+    const response = await fetch(sessionUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        model,
+      }),
+    });
     const data = await response.json();
+    if (!response.ok) {
+      const error = new Error(
+        `Failed to create realtime session: ${response.status} ${response.statusText}`,
+      );
+      (error as any).response = data;
+      throw error;
+    }
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error in /session:", error);
