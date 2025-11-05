@@ -21,11 +21,16 @@ There are two main patterns demonstrated:
 
 ## Setup
 
-- This is a Next.js typescript app. Install dependencies with `npm i`.
-- Add your `OPENAI_API_KEY` to your env. Either add it to your `.bash_profile` or equivalent, or copy `.env.sample` to `.env` and add it there.
-- Start the server with `npm run dev`
-- Open your browser to [http://localhost:3000](http://localhost:3000). It should default to the `chatSupervisor` Agent Config.
-- You can change examples via the "Scenario" dropdown in the top right.
+1. **Provision Azure OpenAI resources.** Create (or reuse) an Azure OpenAI resource and deploy the models you need for this sample. At minimum you will need:
+   - A *Responses* capable deployment (for example `o4-mini`) that will be referenced by your agent configs.
+   - A *Realtime* deployment for the voice experience.
+   - Optional deployments for Whisper transcription and guardrails if you plan to enable those features.
+2. **Register an Azure AD application.** Configure a client-credential application in Microsoft Entra ID, grant it access to your Azure OpenAI resource (for example by assigning the **Cognitive Services OpenAI User** role), and capture the tenant ID, client ID, and client secret.
+3. **Populate environment variables.** Copy `.env.sample` to `.env` and fill in the values for `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_VERSION`, `AZURE_OPENAI_REALTIME_DEPLOYMENT`, `AZURE_OPENAI_TRANSCRIBE_DEPLOYMENT`, `AZURE_OPENAI_GUARDRAIL_DEPLOYMENT`, `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, and `AZURE_CLIENT_SECRET` with the values from your Azure resources.
+4. **Install dependencies.** This is a Next.js TypeScript app—install dependencies with `npm install`.
+5. **Start the dev server.** Run `npm run dev` and open [http://localhost:3000](http://localhost:3000). It should default to the `chatSupervisor` Agent Config, and you can switch scenarios with the dropdown in the top-right corner.
+
+> ℹ️ The server routes call the Azure OpenAI REST endpoints with `fetch` so we can take advantage of the `responses` API surface, which is not yet available in the `@azure/openai` SDK.
 
 ### Azure OpenAI configuration
 
