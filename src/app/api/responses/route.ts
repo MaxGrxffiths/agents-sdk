@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAzureAccessToken } from '@/server/azure';
 
-// Proxy endpoint for the OpenAI Responses API
+import {
+  buildAzureOpenAIUrl,
+  getAzureGuardrailDeployment,
+  getAzureOpenAIToken,
+} from '@/server/azureOpenAI';
+
+// Proxy endpoint for the Azure OpenAI Responses API
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
@@ -42,6 +48,13 @@ async function structuredResponse(config: AzureConfig, deployment: string, body:
     console.error('responses proxy error', err);
     return NextResponse.json({ error: 'failed' }, { status: 500 });
   }
+
+  const data = await response.json();
+  const parsed = extractParsedContent(data);
+  if (parsed !== undefined) {
+    data.output_parsed = parsed;
+  }
+  return data;
 }
 
 async function textResponse(config: AzureConfig, deployment: string, body: any) {
@@ -52,6 +65,7 @@ async function textResponse(config: AzureConfig, deployment: string, body: any) 
     console.error('responses proxy error', err);
     return NextResponse.json({ error: 'failed' }, { status: 500 });
   }
+  return undefined;
 }
 
 function getAzureConfig(): AzureConfig {
