@@ -1,4 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+
+import {
+  buildAzureOpenAIUrl,
+  getAzureOpenAIToken,
+  getAzureRealtimeDeployment,
+  getAzureTranscribeDeployment,
+} from '@/server/azureOpenAI';
 
 import { buildAzureRealtimeSessionRequest } from "./azure";
 
@@ -42,10 +49,10 @@ export async function GET() {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error in /session:", error);
+    console.error('Error in /session:', error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
+      { error: 'Internal Server Error' },
+      { status: 500 },
     );
   }
 }
