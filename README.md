@@ -37,11 +37,13 @@ There are two main patterns demonstrated:
 To target Azure OpenAI deployments you need to provide the deployment identifiers and endpoint that correspond to your Azure resource. Copy `.env.sample` to `.env` and fill in the Azure variables:
 
 ```bash
-AZURE_OPENAI_API_KEY=your_azure_api_key
 AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com
 AZURE_OPENAI_REALTIME_DEPLOYMENT=voice-realtime-deployment
 AZURE_OPENAI_TRANSCRIPTION_DEPLOYMENT=voice-transcription-deployment
 AZURE_OPENAI_REALTIME_API_VERSION=2024-10-01-preview
+AZURE_TENANT_ID=your-tenant-id
+AZURE_CLIENT_ID=your-client-id
+AZURE_CLIENT_SECRET=your-client-secret
 
 # Expose the same values to the browser so the WebRTC transport can dial Azure
 NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com

@@ -13,12 +13,27 @@ import { getServerRealtimeConfig } from "../../lib/realtimeConfig";
 
 export async function GET() {
   try {
-    const { sessionUrl, model, headers } = getServerRealtimeConfig();
+    const config = getServerRealtimeConfig();
 
-    if (!headers["api-key"] && !headers["Authorization"]) {
-      throw new Error(
-        "Missing API credentials for realtime session creation",
-      );
+    let sessionUrl = config.sessionUrl;
+    let model = config.model;
+    let headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (config.isAzure) {
+      const request = await buildAzureRealtimeSessionRequest();
+      sessionUrl = request.url;
+      model = request.deployment;
+      headers = request.headers as Record<string, string>;
+    } else {
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        throw new Error(
+          "Missing OPENAI_API_KEY for realtime session creation",
+        );
+      }
+      headers.Authorization = `Bearer ${apiKey}`;
     }
 
     const response = await fetch(sessionUrl, {
